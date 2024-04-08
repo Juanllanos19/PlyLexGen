@@ -1,7 +1,8 @@
 import ply.lex as lex
 
 tokens = ('FLOAT', 
-          'INT')  
+          'INT',
+          'STR')  
 
 t_ignore = ' \t'
 
@@ -15,6 +16,11 @@ def t_INT(t):
     r'\d+(?:_\d+)*'  
     t.value = int(t.value.replace('_', ''))
     return t
+
+def t_STR(t):
+    r'^\".*\"$|^\'.*\'$'
+    return t
+
 
 def t_error(t):
     raise lex.LexError("Illegal character '%s'" % t.value[0],[])
