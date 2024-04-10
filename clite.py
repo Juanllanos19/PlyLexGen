@@ -4,7 +4,10 @@ tokens = ('FLOAT',
           'INT',
           'STR')  
 
-t_ignore = ' \t'
+
+states = (
+    ('str', 'exclusive'),
+)
 
 
 def t_FLOAT(t):
@@ -18,12 +21,27 @@ def t_INT(t):
     return t
 
 def t_STR(t):
-    r'^\".*\"$|^\'.*\'$'
-    return t
-
+    r'\"'
+    t.lexer.str_start = t.lexer.lexpos - 1  # Registra la posición inicial de la cadena
+    t.lexer.begin('str')  # Cambia al estado str
 
 def t_error(t):
     raise lex.LexError("Illegal character '%s'" % t.value[0],[])
+
+def t_str_END(t):
+    r'\"'
+    t.value = t.lexer.lexdata[t.lexer.str_start : t.lexer.lexpos + 1]
+    t.type = 'STR'
+    t.lexer.lineno += t.value.count('\n')
+    t.lexer.begin('INITIAL')
+    return t
+
+def t_str_content(t):
+    r'[a-zA-Z\s]+'
+
+def t_str_error(t):
+    print("Illegal character '%s' in string" % t.value[0])
+    t.lexer.skip(1)
 
 lexer = lex.lex()
 
